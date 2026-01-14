@@ -3,347 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quinta Olivia - Gestión de Reservas</title>
+    <title>Quinta Olivia - Reservas</title>
     <style>
         :root {
             --primary-olive: #6b705c; 
-            --accent-gold: #b7b7a4;   
-            --dark-olive: #3f4238;
-            --leaf-busy: #6a1b1b; /* Borgoña */
-            --leaf-free: #8b9467; /* Verde hoja */
-            --glass: rgba(255, 255, 255, 0.95);
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --bg-calendar: #f1f2e1;
+            --cell-bg: #cbd3b6;
+            --leaf-busy: #6a1b1b; 
+            --leaf-free: #8b9467; 
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #e9edc9 0%, #fefae0 100%);
-            margin: 0; padding: 0; color: var(--dark-olive);
-            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-calendar);
+            margin: 0; padding: 0; color: #333;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- PANTALLA DE ACCESO (LOGIN) --- */
+        /* Bloqueo de Acceso */
         #loginOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #6b705c 0%, #3f4238 100%);
-            z-index: 10000; display: flex; justify-content: center; align-items: center;
+            background: #6b705c; z-index: 10000; display: flex; justify-content: center; align-items: center;
         }
         .login-box {
-            background: white; padding: 40px; border-radius: 25px;
-            text-align: center; box-shadow: var(--shadow); width: 85%; max-width: 350px;
-        }
-        .login-box img { width: 100px; margin-bottom: 20px; }
-        .login-box input { 
-            width: 100%; padding: 15px; margin: 10px 0; 
-            border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; text-align: center;
+            background: white; padding: 30px; border-radius: 20px;
+            text-align: center; width: 80%; max-width: 300px;
         }
 
-        /* --- DISEÑO DEL CALENDARIO --- */
-        header {
-            background: var(--glass); padding: 20px; text-align: center;
-            box-shadow: var(--shadow); border-bottom: 1px solid rgba(255,255,255,0.3);
-        }
-        .logo-main { width: 140px; height: 140px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; }
+        /* Header y Logo */
+        header { text-align: center; padding: 15px; background: white; border-bottom: 1px solid #ddd; }
+        .logo-main { width: 120px; height: 120px; margin: 0 auto 5px; }
         .logo-main img { width: 100%; height: 100%; object-fit: contain; }
+        h1 { margin: 0; font-size: 1.1rem; color: var(--primary-olive); text-transform: uppercase; letter-spacing: 1px; }
 
-        h1 { margin: 0; font-size: 1.3rem; letter-spacing: 2px; text-transform: uppercase; color: var(--primary-olive); }
+        /* Navegación */
+        .month-nav { display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px; }
+        .nav-btn { background: #7a7a7a; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; }
+        #monthYearLabel { font-size: 1.2rem; font-weight: bold; min-width: 150px; text-align: center; }
 
-        .month-nav { display: flex; justify-content: center; align-items: center; gap: 30px; padding: 20px; }
-        .nav-btn {
-            background: var(--primary-olive); color: white; border: none;
-            width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;
-        }
-
-        #monthYearLabel { font-size: 1.2rem; font-weight: bold; text-transform: capitalize; min-width: 160px; text-align: center; }
-
-        .calendar-container { padding: 10px; max-width: 700px; margin: 0 auto; }
+        /* Calendario */
+        .calendar-container { padding: 5px; max-width: 500px; margin: 0 auto; }
         .weekdays {
             display: grid; grid-template-columns: repeat(7, 1fr);
-            text-align: center; font-weight: bold; color: var(--primary-olive); margin-bottom: 10px;
+            text-align: center; font-weight: bold; font-size: 0.8rem; color: #555; margin-bottom: 10px;
         }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 
-        /* CELDA DE DÍA (PÉTALOS) */
+        /* CELDAS ESTILO DISEÑO ORIGINAL */
         .day-cell {
-            background: #cbd3b6; aspect-ratio: 1.1/1; border-radius: 8px; 
-            border: 1.5px solid #7a8464; padding: 8px; position: relative;
-            cursor: pointer; transition: 0.3s;
+            background: var(--cell-bg);
+            aspect-ratio: 1/1; /* Cuadradas perfectas */
+            border-radius: 6px;
+            border: 1px solid #99a384;
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            padding: 4px;
         }
-        .day-cell:hover { transform: scale(1.03); background: #dce4c9; }
-        .day-cell.today { border: 2.5px solid var(--leaf-busy); box-shadow: 0 0 10px rgba(106, 27, 27, 0.2); }
-        .day-number { font-weight: bold; font-size: 1rem; color: #2d3125; }
+        .day-cell.today { border: 2px solid var(--leaf-busy); }
+        .day-number { font-weight: 900; font-size: 0.95rem; color: #1a1a1a; z-index: 2; }
 
+        /* PÉTALOS - POSICIONAMIENTO FIJO */
         .leaf-container {
-            position: absolute; right: 6px; bottom: 6px;
-            display: flex; flex-direction: column; gap: 4px; align-items: flex-end;
+            position: absolute;
+            right: 2px;
+            bottom: 2px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
         }
-        .leaf { width: 22px; height: 14px; border-radius: 0 100% 0 100%; border: 1px solid rgba(0,0,0,0.1); }
+        .leaf {
+            width: 24px;  /* Tamaño ajustado para celular */
+            height: 14px;
+            border-radius: 0 100% 0 100%;
+            border: 0.5px solid rgba(255,255,255,0.3);
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
         .leaf.busy { background-color: var(--leaf-busy); }
         .leaf.free { background-color: var(--leaf-free); }
 
-        /* MODAL Y FORMULARIOS */
+        /* Formularios y Modales */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
-            z-index: 1000; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000;
+            justify-content: center; align-items: center;
         }
         .modal.active { display: flex; }
         .modal-content {
-            background: white; width: 95%; max-width: 450px;
-            border-radius: 25px; padding: 30px; box-sizing: border-box;
-            max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow);
+            background: white; width: 90%; max-width: 380px;
+            border-radius: 20px; padding: 20px; box-sizing: border-box;
         }
-
-        .slot-card {
-            background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 15px;
-            border-left: 6px solid #ccc;
-        }
-        .slot-card.busy { border-left-color: var(--leaf-busy); }
-        .slot-card.free { border-left-color: var(--leaf-free); }
-
-        label { display: block; margin-top: 10px; font-size: 0.8rem; font-weight: bold; color: var(--primary-olive); }
-        input, textarea {
-            width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd;
-            border-radius: 10px; box-sizing: border-box; font-family: inherit;
-        }
-
-        .action-btn {
-            width: 100%; padding: 14px; border: none; border-radius: 12px;
-            font-size: 1rem; cursor: pointer; margin-top: 15px; font-weight: bold;
-            transition: 0.2s;
-        }
-        .btn-confirm { background: var(--primary-olive); color: white; }
-        .btn-delete { background: #fff; color: var(--leaf-busy); border: 2px solid var(--leaf-busy); }
-        .btn-close { background: #eee; color: #555; margin-top: 10px; }
-
-        /* Indicador de carga */
-        #loading { display:none; color: var(--primary-olive); font-weight: bold; margin-bottom: 10px; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        .action-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; }
+        .btn-save { background: var(--primary-olive); color: white; }
+        .btn-del { background: white; color: var(--leaf-busy); border: 1px solid var(--leaf-busy); }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay">
     <div class="login-box">
-        <img src="logo.jpg" alt="Quinta Olivia" onerror="this.src='https://via.placeholder.com/100?text=LOGO'">
-        <h2>Acceso Administrativo</h2>
-        <p>Introduce la clave para gestionar el calendario</p>
-        <input type="password" id="pinInput" placeholder="Clave de acceso">
-        <button class="action-btn btn-confirm" onclick="validarAcceso()">Entrar</button>
-        <p id="errorMsg" style="color:red; display:none; margin-top:10px;">PIN incorrecto, intenta de nuevo.</p>
+        <img src="logo.jpg" style="width:80px">
+        <h3>Contraseña de Acceso</h3>
+        <input type="password" id="pass" placeholder="Ingresa el PIN">
+        <button class="action-btn btn-save" onclick="login()">Entrar</button>
     </div>
 </div>
 
 <header>
-    <div class="logo-main"><img src="logo.jpg" alt="Quinta Olivia" onerror="this.style.display='none'"></div>
-    <h1>Quinta Olivia</h1>
+    <div class="logo-main"><img src="logo.jpg"></div>
+    <h1>Gestión de Espacios</h1>
 </header>
 
 <div class="month-nav">
-    <button class="nav-btn" id="prevMonth">‹</button>
-    <h3 id="monthYearLabel"></h3>
-    <button class="nav-btn" id="nextMonth">›</button>
+    <button class="nav-btn" id="prev">‹</button>
+    <div id="monthYearLabel"></div>
+    <button class="nav-btn" id="next">›</button>
 </div>
 
 <div class="calendar-container">
     <div class="weekdays">
         <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
     </div>
-    <div class="calendar-grid" id="calendarGrid"></div>
+    <div class="calendar-grid" id="grid"></div>
 </div>
 
-<div class="modal" id="bookingModal">
+<div class="modal" id="modal">
     <div class="modal-content">
-        <div id="loading">Procesando...</div>
-        <h2 id="modalTitle" style="margin-top:0; color:var(--primary-olive)"></h2>
-        <div id="modalBody"></div>
-        <button class="action-btn btn-close" onclick="closeModal()">Cerrar Ventana</button>
+        <h3 id="mTitle" style="margin-top:0"></h3>
+        <div id="mBody"></div>
+        <button class="action-btn" onclick="closeM()" style="background:#eee">Cerrar</button>
     </div>
 </div>
 
 <script>
-    // --- 1. CONFIGURACIÓN INICIAL ---
-    const MI_PIN = "15QuintaOlivia15"; 
-    const API_URL = "https://script.google.com/macros/s/AKfycbx5Sc8EjeAQage-CJ8ZutX1vIBg0pzsR8smMcg9gAKwfTV-VdQq4VgBg59V8B_ROfW-/exec"; 
+    const API = "https://script.google.com/macros/s/AKfycbx5Sc8EjeAQage-CJ8ZutX1vIBg0pzsR8smMcg9gAKwfTV-VdQq4VgBg59V8B_ROfW-/exec";
+    const PIN = "1234"; // <--- CAMBIA TU PIN AQUÍ
 
-    let currentDate = new Date();
-    let bookingsData = [];
+    let curDate = new Date();
+    let data = [];
 
-    // Función de Login
-    function validarAcceso() {
-        const input = document.getElementById('pinInput').value;
-        if(input === MI_PIN) {
+    function login() {
+        if(document.getElementById('pass').value === PIN) {
             document.getElementById('loginOverlay').style.display = 'none';
             init();
-        } else {
-            document.getElementById('errorMsg').style.display = 'block';
-        }
+        } else { alert("Error"); }
     }
 
     async function init() {
-        await fetchData();
-        setupNav();
-    }
-
-    async function fetchData() {
         try {
-            const res = await fetch(API_URL);
-            bookingsData = await res.json();
-            renderCalendar();
-        } catch (e) { console.error("Error cargando datos:", e); }
+            const r = await fetch(API);
+            data = await r.json();
+            render();
+        } catch(e) { console.error(e); }
+        
+        document.getElementById('prev').onclick = () => { curDate.setMonth(curDate.getMonth()-1); render(); };
+        document.getElementById('next').onclick = () => { curDate.setMonth(curDate.getMonth()+1); render(); };
     }
 
-    // --- 2. LÓGICA DEL CALENDARIO ---
-    function renderCalendar() {
-        const grid = document.getElementById('calendarGrid');
-        grid.innerHTML = '';
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        
-        document.getElementById('monthYearLabel').innerText = 
-            new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(currentDate);
+    function render() {
+        const g = document.getElementById('grid');
+        g.innerHTML = '';
+        const y = curDate.getFullYear();
+        const m = curDate.getMonth();
+        document.getElementById('monthYearLabel').innerText = new Intl.DateTimeFormat('es-ES',{month:'long',year:'numeric'}).format(curDate);
 
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const first = new Date(y, m, 1).getDay();
+        const days = new Date(y, m+1, 0).getDate();
 
-        // Celdas vacías
-        for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'));
+        for(let i=0; i<first; i++) g.appendChild(document.createElement('div'));
 
-        // Celdas de días
-        for (let d = 1; d <= daysInMonth; d++) {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            const s1 = bookingsData.find(b => b.date == dateStr && b.slot == 1);
-            const s2 = bookingsData.find(b => b.date == dateStr && b.slot == 2);
+        for(let d=1; d<=days; d++) {
+            const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const s1 = data.find(b => b.date == ds && b.slot == 1);
+            const s2 = data.find(b => b.date == ds && b.slot == 2);
 
             const cell = document.createElement('div');
-            const esHoy = dateStr === new Date().toISOString().split('T')[0];
-            cell.className = 'day-cell' + (esHoy ? ' today' : '');
-            
+            cell.className = 'day-cell';
             cell.innerHTML = `
                 <div class="day-number">${d}</div>
                 <div class="leaf-container">
-                    <div class="leaf ${s1 ? 'busy' : 'free'}" title="Horario 1"></div>
-                    <div class="leaf ${s2 ? 'busy' : 'free'}" title="Horario 2"></div>
+                    <div class="leaf ${s1 ? 'busy' : 'free'}"></div>
+                    <div class="leaf ${s2 ? 'busy' : 'free'}"></div>
                 </div>
             `;
-            cell.onclick = () => openModal(dateStr, s1, s2);
-            grid.appendChild(cell);
+            cell.onclick = () => openM(ds, s1, s2);
+            g.appendChild(cell);
         }
     }
 
-    // --- 3. GESTIÓN DE MODAL Y FORMULARIO ---
-    function openModal(dateStr, s1, s2) {
-        document.getElementById('modalTitle').innerText = "Fecha: " + dateStr;
-        const body = document.getElementById('modalBody');
-        body.innerHTML = '';
-
-        body.appendChild(createSlotUI(1, s1, dateStr));
-        body.appendChild(createSlotUI(2, s2, dateStr));
-
-        document.getElementById('bookingModal').classList.add('active');
+    function openM(ds, s1, s2) {
+        document.getElementById('mTitle').innerText = ds;
+        const b = document.getElementById('mBody');
+        b.innerHTML = ui(1, s1, ds) + ui(2, s2, ds);
+        document.getElementById('modal').classList.add('active');
     }
 
-    function createSlotUI(num, data, date) {
-        const div = document.createElement('div');
-        div.className = `slot-card ${data ? 'busy' : 'free'}`;
-        
-        if (data) {
-            div.innerHTML = `
-                <strong style="color:var(--leaf-busy)">HORARIO ${num} - OCUPADO</strong>
-                <p style="margin:8px 0"><strong>Cliente:</strong> ${data.name}<br>
-                <strong>Horario:</strong> ${data.timeStart} - ${data.timeEnd}<br>
-                <strong>Evento:</strong> ${data.desc}</p>
-                <button class="action-btn btn-delete" onclick="handleDelete('${date}', ${num})">Eliminar Reserva</button>
-            `;
-        } else {
-            div.innerHTML = `
-                <strong style="color:var(--leaf-free)">HORARIO ${num} - DISPONIBLE</strong>
-                <button class="action-btn btn-confirm" onclick="showForm(this, ${num}, '${date}')">Nueva Reserva</button>
-            `;
-        }
-        return div;
+    function ui(n, d, date) {
+        return `<div style="border-bottom:1px solid #eee; padding:10px 0">
+            <strong>Horario ${n}: ${d ? 'OCUPADO' : 'LIBRE'}</strong><br>
+            ${d ? `${d.name} (${d.timeStart}-${d.timeEnd})<br><button class="action-btn btn-del" onclick="del('${date}',${n})">Borrar</button>` : 
+            `<button class="action-btn btn-save" onclick="showF(this,${n},'${date}')">Reservar</button>`}
+        </div>`;
     }
 
-    function showForm(btn, slot, date) {
+    function showF(btn, n, date) {
         btn.parentElement.innerHTML = `
-            <h4 style="margin:0 0 10px 0">Reservar Horario ${slot}</h4>
-            <label>Nombre del Cliente:</label>
-            <input type="text" id="name-${slot}" placeholder="Ej. Juan Pérez">
-            
-            <div style="display:flex; gap:10px">
-                <div style="flex:1">
-                    <label>Inicia:</label>
-                    <input type="time" id="start-${slot}">
-                </div>
-                <div style="flex:1">
-                    <label>Termina:</label>
-                    <input type="time" id="end-${slot}">
-                </div>
-            </div>
-
-            <label>Descripción del Evento:</label>
-            <input type="text" id="desc-${slot}" placeholder="Ej. Boda Civil">
-
-            <label>Notas Extra:</label>
-            <textarea id="comm-${slot}" rows="2" placeholder="Opcional..."></textarea>
-            
-            <button class="action-btn btn-confirm" onclick="handleSave(${slot}, '${date}')">Confirmar y Guardar</button>
+            <input id="n-${n}" placeholder="Nombre">
+            <input type="time" id="s-${n}"> <input type="time" id="e-${n}">
+            <button class="action-btn btn-save" onclick="save(${n},'${date}')">Guardar</button>
         `;
     }
 
-    // --- 4. ACCIONES (GUARDAR / BORRAR) ---
-    async function handleSave(slot, date) {
-        const payload = {
-            date: date,
-            slot: slot,
-            name: document.getElementById(`name-${slot}`).value,
-            timeStart: document.getElementById(`start-${slot}`).value,
-            timeEnd: document.getElementById(`end-${slot}`).value,
-            desc: document.getElementById(`desc-${slot}`).value,
-            comments: document.getElementById(`comm-${slot}`).value
-        };
-
-        if(!payload.name || !payload.timeStart) return alert("Por favor llena el nombre y la hora.");
-
-        document.getElementById('loading').style.display = 'block';
-        
-        // Actualización local inmediata
-        bookingsData.push(payload);
-        renderCalendar();
-        closeModal();
-
-        try {
-            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            setTimeout(fetchData, 1500); 
-        } catch (e) { fetchData(); }
+    async function save(n, date) {
+        const p = { date, slot:n, name:document.getElementById(`n-${n}`).value, timeStart:document.getElementById(`s-${n}`).value, timeEnd:document.getElementById(`e-${n}`).value };
+        data.push(p); render(); closeM();
+        await fetch(API, { method:'POST', mode:'no-cors', body:JSON.stringify(p)});
     }
 
-    async function handleDelete(date, slot) {
-        if (!confirm("¿Seguro que quieres eliminar esta reserva?")) return;
-        
-        document.getElementById('loading').style.display = 'block';
-        bookingsData = bookingsData.filter(b => !(b.date == date && b.slot == slot));
-        renderCalendar();
-        closeModal();
-
-        try {
-            await fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ action: 'delete', date: date, slot: slot })
-            });
-            setTimeout(fetchData, 1500);
-        } catch (e) { fetchData(); }
+    async function del(date, slot) {
+        if(!confirm("¿Borrar?")) return;
+        data = data.filter(b => !(b.date == date && b.slot == slot));
+        render(); closeM();
+        await fetch(API, { method:'POST', mode:'no-cors', body:JSON.stringify({action:'delete',date,slot})});
     }
 
-    function setupNav() {
-        document.getElementById('prevMonth').onclick = () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); };
-        document.getElementById('nextMonth').onclick = () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); };
-    }
-
-    function closeModal() {
-        document.getElementById('bookingModal').classList.remove('active');
-        document.getElementById('loading').style.display = 'none';
-    }
+    function closeM() { document.getElementById('modal').classList.remove('active'); }
 </script>
 </body>
 </html>
