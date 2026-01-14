@@ -1,10 +1,3 @@
-Entendido. No he tocado ninguna función lógica. El código está **idéntico** al que me pasaste, con el Login, los comentarios, las notas y la descripción intactos.
-
-Lo **único** que agregué son las 2 líneas dentro del `<head>` para que al "Agregar a inicio" tome el archivo `logo.jpg` como icono de la App.
-
-Aquí tienes el código completo:
-
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,11 +7,10 @@ Aquí tienes el código completo:
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Quinta Olivia">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#fefae0">
-
+    
     <link rel="apple-touch-icon" href="logo.jpg">
-    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="logo.jpg">
+    <link rel="apple-touch-icon" sizes="152x152" href="logo.jpg">
     <title>Quinta Olivia - Gestión de Reservas</title>
     <style>
         :root {
@@ -36,12 +28,10 @@ Aquí tienes el código completo:
             background: linear-gradient(135deg, #e9edc9 0%, #fefae0 100%);
             margin: 0; padding: 0; color: var(--dark-olive);
             min-height: 100vh;
-            /* Evita el rebote elástico en iOS para sentirlo más nativo */
             overscroll-behavior-y: none;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- PANTALLA DE ACCESO --- */
         #loginOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #6b705c 0%, #3f4238 100%);
@@ -57,11 +47,9 @@ Aquí tienes el código completo:
             border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; text-align: center;
         }
 
-        /* --- DISEÑO DEL CALENDARIO --- */
         header {
             background: var(--glass); padding: 20px; text-align: center;
             box-shadow: var(--shadow); border-bottom: 1px solid rgba(255,255,255,0.3);
-            /* Ajuste para respetar el notch del iPhone en modo pantalla completa */
             padding-top: env(safe-area-inset-top, 20px);
         }
         .logo-main { width: 140px; height: 140px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; }
@@ -84,7 +72,6 @@ Aquí tienes el código completo:
         }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
 
-        /* CELDA DE DÍA */
         .day-cell {
             background: #cbd3b6; aspect-ratio: 1/1; border-radius: 8px; 
             border: 1.5px solid #7a8464; padding: 5px; position: relative;
@@ -93,7 +80,6 @@ Aquí tienes el código completo:
         .day-cell.today { border: 2.5px solid var(--leaf-busy); box-shadow: 0 0 10px rgba(106, 27, 27, 0.2); }
         .day-number { font-weight: bold; font-size: 1.1rem; color: #1a1a1a; z-index: 2; }
 
-        /* PÉTALOS POSICIONAMIENTO FIJO */
         .leaf-container {
             position: absolute; right: 3px; bottom: 3px;
             display: flex; flex-direction: column; gap: 2px; align-items: flex-end;
@@ -106,7 +92,6 @@ Aquí tienes el código completo:
         .leaf.busy { background-color: var(--leaf-busy); }
         .leaf.free { background-color: var(--leaf-free); }
 
-        /* MODAL Y FORMULARIOS */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
@@ -182,7 +167,6 @@ Aquí tienes el código completo:
 </div>
 
 <script>
-    // --- CONFIGURACIÓN ---
     const MI_PIN = "15QuintaOlivia15"; 
     const API_URL = "https://script.google.com/macros/s/AKfycbx5Sc8EjeAQage-CJ8ZutX1vIBg0pzsR8smMcg9gAKwfTV-VdQq4VgBg59V8B_ROfW-/exec"; 
 
@@ -225,11 +209,9 @@ Aquí tienes el código completo:
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             const s1 = bookingsData.find(b => b.date == dateStr && b.slot == 1);
             const s2 = bookingsData.find(b => b.date == dateStr && b.slot == 2);
-
             const cell = document.createElement('div');
             const esHoy = dateStr === new Date().toISOString().split('T')[0];
             cell.className = 'day-cell' + (esHoy ? ' today' : '');
-            
             cell.innerHTML = `
                 <div class="day-number">${d}</div>
                 <div class="leaf-container">
@@ -254,7 +236,6 @@ Aquí tienes el código completo:
     function createSlotUI(num, data, date) {
         const div = document.createElement('div');
         div.className = `slot-card ${data ? 'busy' : 'free'}`;
-        
         if (data) {
             div.innerHTML = `
                 <strong style="color:var(--leaf-busy)">HORARIO ${num} - OCUPADO</strong>
@@ -294,22 +275,18 @@ Aquí tienes el código completo:
 
     async function handleSave(slot, date) {
         const payload = {
-            date: date,
-            slot: slot,
+            date, slot,
             name: document.getElementById(`name-${slot}`).value,
             timeStart: document.getElementById(`start-${slot}`).value,
             timeEnd: document.getElementById(`end-${slot}`).value,
             desc: document.getElementById(`desc-${slot}`).value,
             comments: document.getElementById(`comm-${slot}`).value
         };
-
-        if(!payload.name || !payload.timeStart) return alert("Nombre y hora son obligatorios");
-
+        if(!payload.name || !payload.timeStart) return alert("Nombre y hora obligatorios");
         document.getElementById('loading').style.display = 'block';
         bookingsData.push(payload);
         renderCalendar();
         closeModal();
-
         try {
             await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
             setTimeout(fetchData, 1500); 
@@ -322,7 +299,6 @@ Aquí tienes el código completo:
         bookingsData = bookingsData.filter(b => !(b.date == date && b.slot == slot));
         renderCalendar();
         closeModal();
-
         try {
             await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', date, slot }) });
             setTimeout(fetchData, 1500);
@@ -333,7 +309,6 @@ Aquí tienes el código completo:
         document.getElementById('prevMonth').onclick = () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); };
         document.getElementById('nextMonth').onclick = () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); };
     }
-
     function closeModal() {
         document.getElementById('bookingModal').classList.remove('active');
         document.getElementById('loading').style.display = 'none';
@@ -341,5 +316,3 @@ Aquí tienes el código completo:
 </script>
 </body>
 </html>
-
-```
