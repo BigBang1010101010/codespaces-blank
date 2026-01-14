@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quinta Olivia - Gestión de Reservas</title>
+    <style>
+        :root {
+            --primary-olive: #6b705c; 
+            --accent-gold: #b7b7a4;   
+            --dark-olive: #3f4238;
+            --leaf-busy: #6a1b1b; /* Borgoña */
+            --leaf-free: #8b9467; /* Verde hoja */
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e9edc9 0%, #fefae0 100%);
+            margin: 0; padding: 0; color: var(--dark-olive);
+            min-height: 100vh;
+        }
+
+        /* --- PANTALLA DE ACCESO (LOGIN) --- */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #6b705c 0%, #3f4238 100%);
+            z-index: 10000; display: flex; justify-content: center; align-items: center;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 25px;
+            text-align: center; box-shadow: var(--shadow); width: 85%; max-width: 350px;
+        }
+        .login-box img { width: 100px; margin-bottom: 20px; }
+        .login-box input { 
+            width: 100%; padding: 15px; margin: 10px 0; 
+            border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; text-align: center;
+        }
+
+        /* --- DISEÑO DEL CALENDARIO --- */
+        header {
+            background: var(--glass); padding: 20px; text-align: center;
+            box-shadow: var(--shadow); border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+        .logo-main { width: 140px; height: 140px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; }
+        .logo-main img { width: 100%; height: 100%; object-fit: contain; }
+
+        h1 { margin: 0; font-size: 1.3rem; letter-spacing: 2px; text-transform: uppercase; color: var(--primary-olive); }
+
+        .month-nav { display: flex; justify-content: center; align-items: center; gap: 30px; padding: 20px; }
+        .nav-btn {
+            background: var(--primary-olive); color: white; border: none;
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;
+        }
+
+        #monthYearLabel { font-size: 1.2rem; font-weight: bold; text-transform: capitalize; min-width: 160px; text-align: center; }
+
+        .calendar-container { padding: 10px; max-width: 700px; margin: 0 auto; }
+        .weekdays {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            text-align: center; font-weight: bold; color: var(--primary-olive); margin-bottom: 10px;
+        }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+
+        /* CELDA DE DÍA (PÉTALOS) */
+        .day-cell {
+            background: #cbd3b6; aspect-ratio: 1.1/1; border-radius: 8px; 
+            border: 1.5px solid #7a8464; padding: 8px; position: relative;
+            cursor: pointer; transition: 0.3s;
+        }
+        .day-cell:hover { transform: scale(1.03); background: #dce4c9; }
+        .day-cell.today { border: 2.5px solid var(--leaf-busy); box-shadow: 0 0 10px rgba(106, 27, 27, 0.2); }
+        .day-number { font-weight: bold; font-size: 1rem; color: #2d3125; }
+
+        .leaf-container {
+            position: absolute; right: 6px; bottom: 6px;
+            display: flex; flex-direction: column; gap: 4px; align-items: flex-end;
+        }
+        .leaf { width: 22px; height: 14px; border-radius: 0 100% 0 100%; border: 1px solid rgba(0,0,0,0.1); }
+        .leaf.busy { background-color: var(--leaf-busy); }
+        .leaf.free { background-color: var(--leaf-free); }
+
+        /* MODAL Y FORMULARIOS */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+            z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white; width: 95%; max-width: 450px;
+            border-radius: 25px; padding: 30px; box-sizing: border-box;
+            max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow);
+        }
+
+        .slot-card {
+            background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 15px;
+            border-left: 6px solid #ccc;
+        }
+        .slot-card.busy { border-left-color: var(--leaf-busy); }
+        .slot-card.free { border-left-color: var(--leaf-free); }
+
+        label { display: block; margin-top: 10px; font-size: 0.8rem; font-weight: bold; color: var(--primary-olive); }
+        input, textarea {
+            width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd;
+            border-radius: 10px; box-sizing: border-box; font-family: inherit;
+        }
+
+        .action-btn {
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            font-size: 1rem; cursor: pointer; margin-top: 15px; font-weight: bold;
+            transition: 0.2s;
+        }
+        .btn-confirm { background: var(--primary-olive); color: white; }
+        .btn-delete { background: #fff; color: var(--leaf-busy); border: 2px solid var(--leaf-busy); }
+        .btn-close { background: #eee; color: #555; margin-top: 10px; }
+
+        /* Indicador de carga */
+        #loading { display:none; color: var(--primary-olive); font-weight: bold; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="loginOverlay">
+    <div class="login-box">
+        <img src="logo.jpg" alt="Quinta Olivia" onerror="this.src='https://via.placeholder.com/100?text=LOGO'">
+        <h2>Acceso Administrativo</h2>
+        <p>Introduce la clave para gestionar el calendario</p>
+        <input type="password" id="pinInput" placeholder="Clave de acceso">
+        <button class="action-btn btn-confirm" onclick="validarAcceso()">Entrar</button>
+        <p id="errorMsg" style="color:red; display:none; margin-top:10px;">PIN incorrecto, intenta de nuevo.</p>
+    </div>
+</div>
+
+<header>
+    <div class="logo-main"><img src="logo.jpg" alt="Quinta Olivia" onerror="this.style.display='none'"></div>
+    <h1>Quinta Olivia</h1>
+</header>
+
+<div class="month-nav">
+    <button class="nav-btn" id="prevMonth">‹</button>
+    <h3 id="monthYearLabel"></h3>
+    <button class="nav-btn" id="nextMonth">›</button>
+</div>
+
+<div class="calendar-container">
+    <div class="weekdays">
+        <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+</div>
+
+<div class="modal" id="bookingModal">
+    <div class="modal-content">
+        <div id="loading">Procesando...</div>
+        <h2 id="modalTitle" style="margin-top:0; color:var(--primary-olive)"></h2>
+        <div id="modalBody"></div>
+        <button class="action-btn btn-close" onclick="closeModal()">Cerrar Ventana</button>
+    </div>
+</div>
+
+<script>
+    // --- 1. CONFIGURACIÓN INICIAL ---
+    const MI_PIN = "15QuintaOlivia15"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbx5Sc8EjeAQage-CJ8ZutX1vIBg0pzsR8smMcg9gAKwfTV-VdQq4VgBg59V8B_ROfW-/exec"; 
+
+    let currentDate = new Date();
+    let bookingsData = [];
+
+    // Función de Login
+    function validarAcceso() {
+        const input = document.getElementById('pinInput').value;
+        if(input === MI_PIN) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            init();
+        } else {
+            document.getElementById('errorMsg').style.display = 'block';
+        }
+    }
+
+    async function init() {
+        await fetchData();
+        setupNav();
+    }
+
+    async function fetchData() {
+        try {
+            const res = await fetch(API_URL);
+            bookingsData = await res.json();
+            renderCalendar();
+        } catch (e) { console.error("Error cargando datos:", e); }
+    }
+
+    // --- 2. LÓGICA DEL CALENDARIO ---
+    function renderCalendar() {
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        
+        document.getElementById('monthYearLabel').innerText = 
+            new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(currentDate);
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // Celdas vacías
+        for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'));
+
+        // Celdas de días
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const s1 = bookingsData.find(b => b.date == dateStr && b.slot == 1);
+            const s2 = bookingsData.find(b => b.date == dateStr && b.slot == 2);
+
+            const cell = document.createElement('div');
+            const esHoy = dateStr === new Date().toISOString().split('T')[0];
+            cell.className = 'day-cell' + (esHoy ? ' today' : '');
+            
+            cell.innerHTML = `
+                <div class="day-number">${d}</div>
+                <div class="leaf-container">
+                    <div class="leaf ${s1 ? 'busy' : 'free'}" title="Horario 1"></div>
+                    <div class="leaf ${s2 ? 'busy' : 'free'}" title="Horario 2"></div>
+                </div>
+            `;
+            cell.onclick = () => openModal(dateStr, s1, s2);
+            grid.appendChild(cell);
+        }
+    }
+
+    // --- 3. GESTIÓN DE MODAL Y FORMULARIO ---
+    function openModal(dateStr, s1, s2) {
+        document.getElementById('modalTitle').innerText = "Fecha: " + dateStr;
+        const body = document.getElementById('modalBody');
+        body.innerHTML = '';
+
+        body.appendChild(createSlotUI(1, s1, dateStr));
+        body.appendChild(createSlotUI(2, s2, dateStr));
+
+        document.getElementById('bookingModal').classList.add('active');
+    }
+
+    function createSlotUI(num, data, date) {
+        const div = document.createElement('div');
+        div.className = `slot-card ${data ? 'busy' : 'free'}`;
+        
+        if (data) {
+            div.innerHTML = `
+                <strong style="color:var(--leaf-busy)">HORARIO ${num} - OCUPADO</strong>
+                <p style="margin:8px 0"><strong>Cliente:</strong> ${data.name}<br>
+                <strong>Horario:</strong> ${data.timeStart} - ${data.timeEnd}<br>
+                <strong>Evento:</strong> ${data.desc}</p>
+                <button class="action-btn btn-delete" onclick="handleDelete('${date}', ${num})">Eliminar Reserva</button>
+            `;
+        } else {
+            div.innerHTML = `
+                <strong style="color:var(--leaf-free)">HORARIO ${num} - DISPONIBLE</strong>
+                <button class="action-btn btn-confirm" onclick="showForm(this, ${num}, '${date}')">Nueva Reserva</button>
+            `;
+        }
+        return div;
+    }
+
+    function showForm(btn, slot, date) {
+        btn.parentElement.innerHTML = `
+            <h4 style="margin:0 0 10px 0">Reservar Horario ${slot}</h4>
+            <label>Nombre del Cliente:</label>
+            <input type="text" id="name-${slot}" placeholder="Ej. Juan Pérez">
+            
+            <div style="display:flex; gap:10px">
+                <div style="flex:1">
+                    <label>Inicia:</label>
+                    <input type="time" id="start-${slot}">
+                </div>
+                <div style="flex:1">
+                    <label>Termina:</label>
+                    <input type="time" id="end-${slot}">
+                </div>
+            </div>
+
+            <label>Descripción del Evento:</label>
+            <input type="text" id="desc-${slot}" placeholder="Ej. Boda Civil">
+
+            <label>Notas Extra:</label>
+            <textarea id="comm-${slot}" rows="2" placeholder="Opcional..."></textarea>
+            
+            <button class="action-btn btn-confirm" onclick="handleSave(${slot}, '${date}')">Confirmar y Guardar</button>
+        `;
+    }
+
+    // --- 4. ACCIONES (GUARDAR / BORRAR) ---
+    async function handleSave(slot, date) {
+        const payload = {
+            date: date,
+            slot: slot,
+            name: document.getElementById(`name-${slot}`).value,
+            timeStart: document.getElementById(`start-${slot}`).value,
+            timeEnd: document.getElementById(`end-${slot}`).value,
+            desc: document.getElementById(`desc-${slot}`).value,
+            comments: document.getElementById(`comm-${slot}`).value
+        };
+
+        if(!payload.name || !payload.timeStart) return alert("Por favor llena el nombre y la hora.");
+
+        document.getElementById('loading').style.display = 'block';
+        
+        // Actualización local inmediata
+        bookingsData.push(payload);
+        renderCalendar();
+        closeModal();
+
+        try {
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            setTimeout(fetchData, 1500); 
+        } catch (e) { fetchData(); }
+    }
+
+    async function handleDelete(date, slot) {
+        if (!confirm("¿Seguro que quieres eliminar esta reserva?")) return;
+        
+        document.getElementById('loading').style.display = 'block';
+        bookingsData = bookingsData.filter(b => !(b.date == date && b.slot == slot));
+        renderCalendar();
+        closeModal();
+
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({ action: 'delete', date: date, slot: slot })
+            });
+            setTimeout(fetchData, 1500);
+        } catch (e) { fetchData(); }
+    }
+
+    function setupNav() {
+        document.getElementById('prevMonth').onclick = () => { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); };
+        document.getElementById('nextMonth').onclick = () => { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); };
+    }
+
+    function closeModal() {
+        document.getElementById('bookingModal').classList.remove('active');
+        document.getElementById('loading').style.display = 'none';
+    }
+</script>
+</body>
+</html>
