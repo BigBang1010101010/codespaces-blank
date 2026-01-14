@@ -2,7 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Quinta Olivia">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#fefae0">
     <title>Quinta Olivia - Gestión de Reservas</title>
     <style>
         :root {
@@ -20,6 +26,9 @@
             background: linear-gradient(135deg, #e9edc9 0%, #fefae0 100%);
             margin: 0; padding: 0; color: var(--dark-olive);
             min-height: 100vh;
+            /* Evita el rebote elástico en iOS para sentirlo más nativo */
+            overscroll-behavior-y: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* --- PANTALLA DE ACCESO --- */
@@ -42,6 +51,8 @@
         header {
             background: var(--glass); padding: 20px; text-align: center;
             box-shadow: var(--shadow); border-bottom: 1px solid rgba(255,255,255,0.3);
+            /* Ajuste para respetar el notch del iPhone en modo pantalla completa */
+            padding-top: env(safe-area-inset-top, 20px);
         }
         .logo-main { width: 140px; height: 140px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; }
         .logo-main img { width: 100%; height: 100%; object-fit: contain; }
@@ -56,7 +67,7 @@
 
         #monthYearLabel { font-size: 1.2rem; font-weight: bold; text-transform: capitalize; min-width: 160px; text-align: center; }
 
-        .calendar-container { padding: 10px; max-width: 700px; margin: 0 auto; }
+        .calendar-container { padding: 10px; max-width: 700px; margin: 0 auto; padding-bottom: 40px; }
         .weekdays {
             display: grid; grid-template-columns: repeat(7, 1fr);
             text-align: center; font-weight: bold; color: var(--primary-olive); margin-bottom: 10px;
