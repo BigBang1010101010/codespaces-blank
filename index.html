@@ -11,6 +11,7 @@
     <link rel="apple-touch-icon" href="logo.jpg">
     <link rel="apple-touch-icon" sizes="180x180" href="logo.jpg">
     <link rel="apple-touch-icon" sizes="152x152" href="logo.jpg">
+
     <title>Quinta Olivia - Gestión de Reservas</title>
     <style>
         :root {
@@ -173,6 +174,17 @@
     let currentDate = new Date();
     let bookingsData = [];
 
+    // FUNCIÓN PARA LIMPIAR EL FORMATO DE HORA RARO (ISO 1899...)
+    function formatTime(timeStr) {
+        if (!timeStr) return "N/A";
+        // Si contiene la T de los formatos de fecha (ej: 1899-12-31T02:11...)
+        if (String(timeStr).includes('T')) {
+            const timePart = String(timeStr).split('T')[1]; // Nos quedamos con 02:11:00.000Z
+            return timePart.substring(0, 5); // Cortamos a HH:mm
+        }
+        return timeStr;
+    }
+
     function validarAcceso() {
         if(document.getElementById('pinInput').value === MI_PIN) {
             document.getElementById('loginOverlay').style.display = 'none';
@@ -241,7 +253,7 @@
                 <strong style="color:var(--leaf-busy)">HORARIO ${num} - OCUPADO</strong>
                 <p style="margin:10px 0; font-size:0.9rem; line-height:1.4;">
                     <strong>Cliente:</strong> ${data.name}<br>
-                    <strong>Horario:</strong> ${data.timeStart} - ${data.timeEnd}<br>
+                    <strong>Horario:</strong> ${formatTime(data.timeStart)} - ${formatTime(data.timeEnd)}<br>
                     <strong>Evento:</strong> ${data.desc || 'Sin descripción'}<br>
                     <strong>Notas:</strong> ${data.comments || 'Sin notas'}
                 </p>
